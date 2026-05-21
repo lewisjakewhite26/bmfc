@@ -8,14 +8,14 @@ import {
 } from '../config/leagueTables';
 
 const smoothEase = [0.4, 0, 0.2, 1] as const;
-const BMFC_FROM_INDEX = 8; // 9th place
-const BMFC_TO_INDEX = 2; // 3rd place
+const BMFC_FROM_INDEX = 8;
+const BMFC_TO_INDEX = 2;
 
 const TIMING = {
-  blurIn: 900,
-  swapOthers: 400,
-  bmfcMove: 3200,
-  revealOthers: 1000,
+  blurIn: 650,
+  swapDelay: 200,
+  bmfcMove: 3000,
+  land: 320,
 };
 
 function ordinalPlace(n: number) {
@@ -34,6 +34,7 @@ function byPosition(rows: LeagueRow[]) {
 
 const slots2425 = byPosition(leagueTable2425);
 const slots2526 = byPosition(leagueTable2526);
+const bmfc2525 = slots2425[BMFC_FROM_INDEX];
 const bmfc2526 = slots2526[BMFC_TO_INDEX];
 
 interface LeagueTableScreenProps {
@@ -67,17 +68,12 @@ export function LeagueTableScreen({
   const [seasonLabel, setSeasonLabel] = useState('2024/25');
   const [othersBlur, setOthersBlur] = useState(false);
   const [bmfcFloating, setBmfcFloating] = useState(false);
-  const [bmfcRowIndex, setBmfcRowIndex] = useState(BMFC_FROM_INDEX);
-  const [bmfcRowData, setBmfcRowData] = useState(
-    slots2425.find((r) => isBmfcRow(r.club))!,
-  );
+  const [bmfcRowData, setBmfcRowData] = useState(bmfc2525);
   const [complete, setComplete] = useState(false);
   const [started, setStarted] = useState(false);
   const startedRef = useRef(false);
   const completeRef = useRef(false);
   const timeouts = useRef<number[]>([]);
-
-  const bmfcBadgePosition = complete ? 3 : 9;
 
   const clearTimers = () => {
     timeouts.current.forEach((id) => window.clearTimeout(id));
@@ -85,8 +81,7 @@ export function LeagueTableScreen({
   };
 
   const schedule = (fn: () => void, ms: number) => {
-    const id = window.setTimeout(fn, ms);
-    timeouts.current.push(id);
+    timeouts.current.push(window.setTimeout(fn, ms));
   };
 
   const runTransition = useCallback(() => {
@@ -96,28 +91,30 @@ export function LeagueTableScreen({
 
     let t = 0;
 
+    // Other clubs blur, then swap to 2025/26 names in place
     schedule(() => setOthersBlur(true), (t += TIMING.blurIn));
-
     schedule(() => {
-      setSlotRows(slots2526);
+      setSlotRows(
+        slots2526.map((row, i) => (i === BMFC_TO_INDEX ? slots2425[BMFC_TO_INDEX] : row)),
+      );
+    }, (t += TIMING.swapDelay));
+
+    // BMFC lifts from 9th and climbs — only one gap (old 9th row)
+    schedule(() => {
       setBmfcFloating(true);
-    }, (t += TIMING.swapOthers));
+      setBmfcRowData(bmfc2525);
+    }, (t += 80));
 
-    schedule(() => setBmfcRowIndex(BMFC_TO_INDEX), (t += 120));
-
-    schedule(() => {
-      setBmfcRowData(bmfc2526);
-    }, (t += TIMING.bmfcMove - 500));
-
+    // Land: settle into table, reveal everyone, update season — one beat
     schedule(() => {
       setBmfcFloating(false);
       setSlotRows(slots2526);
+      setBmfcRowData(bmfc2526);
       setSeasonLabel('2025/26');
+      setOthersBlur(false);
       setComplete(true);
       completeRef.current = true;
     }, (t += TIMING.bmfcMove));
-
-    schedule(() => setOthersBlur(false), (t += TIMING.revealOthers));
   }, []);
 
   const handleStart = useCallback(() => {
@@ -147,6 +144,11 @@ export function LeagueTableScreen({
 
   useEffect(() => () => clearTimers(), []);
 
+  const blurTransition = {
+    filter: { duration: TIMING.land / 1000, ease: smoothEase },
+    opacity: { duration: TIMING.land / 1000, ease: smoothEase },
+  };
+
   return (
     <div
       className={`screen-container season-screen fade-in-out${!started ? ' league-slide--awaiting' : ''}`}
@@ -159,29 +161,25 @@ export function LeagueTableScreen({
           {title}
         </h2>
 
-        <motion.p
-          className="league-slide-subtitle"
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
-        >
+        <p className="league-slide-subtitle">
           Final League Table {seasonLabel}
           <span className="league-slide-subtitle__comp">{subtitle}</span>
-        </motion.p>
+        </p>
 
         <motion.div
           className="league-bmfc-badge"
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: smoothEase }}
+          transition={{ duration: 0.5, ease: smoothEase }}
         >
           Bishop Middleham FC —{' '}
           <motion.span
             className="league-bmfc-badge__pos"
-            key={bmfcBadgePosition}
-            initial={{ opacity: 0.4, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)' }}
-            transition={{ duration: 0.8, ease: smoothEase }}
+            key={complete ? 'final' : 'start'}
+            initial={false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: TIMING.land / 1000, ease: smoothEase }}
           >
-            {ordinalPlace(bmfcBadgePosition)}
+            {ordinalPlace(complete ? 3 : 9)}
           </motion.span>
         </motion.div>
 
@@ -202,11 +200,7 @@ export function LeagueTableScreen({
               </thead>
               <tbody>
                 {slotRows.map((row, index) => {
-                  const hideForFloat =
-                    bmfcFloating &&
-                    (index === BMFC_FROM_INDEX || index === bmfcRowIndex);
-
-                  if (hideForFloat) {
+                  if (bmfcFloating && index === BMFC_FROM_INDEX) {
                     return (
                       <tr
                         key={`slot-${index}-spacer`}
@@ -218,18 +212,17 @@ export function LeagueTableScreen({
                     );
                   }
 
+                  const isBmfcSlot = !bmfcFloating && isBmfcRow(row.club);
+
                   return (
                     <motion.tr
                       key={`slot-${index}`}
-                      className={isBmfcRow(row.club) ? 'league-row--bmfc' : undefined}
+                      className={isBmfcSlot ? 'league-row--bmfc' : undefined}
                       animate={{
-                        filter: othersBlur ? 'blur(7px)' : 'blur(0px)',
-                        opacity: othersBlur ? 0.2 : 1,
+                        filter: othersBlur && !isBmfcSlot ? 'blur(6px)' : 'blur(0px)',
+                        opacity: othersBlur && !isBmfcSlot ? 0.25 : 1,
                       }}
-                      transition={{
-                        filter: { duration: TIMING.blurIn / 1000, ease: smoothEase },
-                        opacity: { duration: TIMING.blurIn / 1000, ease: smoothEase },
-                      }}
+                      transition={blurTransition}
                     >
                       <LeagueRowCells row={row} />
                     </motion.tr>
@@ -241,9 +234,11 @@ export function LeagueTableScreen({
             {bmfcFloating && (
               <motion.div
                 className="league-floating-row"
-                initial={{ top: `calc(${BMFC_FROM_INDEX} * var(--league-row-height))` }}
+                initial={{
+                  top: `calc(${BMFC_FROM_INDEX} * var(--league-row-height))`,
+                }}
                 animate={{
-                  top: `calc(${bmfcRowIndex} * var(--league-row-height))`,
+                  top: `calc(${BMFC_TO_INDEX} * var(--league-row-height))`,
                 }}
                 transition={{
                   duration: TIMING.bmfcMove / 1000,
@@ -262,14 +257,13 @@ export function LeagueTableScreen({
           </div>
         </div>
 
-        {!complete && (
-          <motion.p
-            className="league-progress-hint"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: started ? 0.35 : 0.5 }}
-          >
-            {started ? 'Climbing the table…' : 'Click or press Space to begin'}
-          </motion.p>
+        {!started && (
+          <p className="league-progress-hint">Click or press Space to begin</p>
+        )}
+        {started && !complete && (
+          <p className="league-progress-hint league-progress-hint--climbing">
+            Climbing the table…
+          </p>
         )}
       </div>
     </div>
