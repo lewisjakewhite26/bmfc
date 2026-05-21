@@ -1,5 +1,8 @@
+import { motion } from 'framer-motion';
 import type { SeasonSlide } from '../config/season';
 import { LeagueTableScreen } from './LeagueTableScreen';
+
+const celebrateEase = [0.34, 1.56, 0.64, 1] as const;
 
 interface SeasonScreenProps {
   slide: SeasonSlide;
@@ -7,7 +10,7 @@ interface SeasonScreenProps {
 
 export function SeasonScreen({ slide }: SeasonScreenProps) {
   if (slide.type === 'league-journey') {
-    return <LeagueTableScreen title={slide.title} />;
+    return <LeagueTableScreen title={slide.title} phase={slide.phase} />;
   }
 
   return (
@@ -65,6 +68,26 @@ export function SeasonScreen({ slide }: SeasonScreenProps) {
               ))}
             </ul>
           </>
+        )}
+
+        {slide.type === 'section-intro' && (
+          <div className="season-slide-wrap season-slide-wrap--awards-intro">
+            <motion.h1
+              className="awards-intro-title"
+              initial={{ opacity: 0, scale: 0.9, filter: 'blur(12px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              transition={{ duration: 1.2, ease: celebrateEase }}
+            >
+              {slide.title}
+            </motion.h1>
+            {slide.lines && slide.lines.length > 0 && (
+              <ul className="season-highlights season-section-intro">
+                {slide.lines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
       </div>
     </div>

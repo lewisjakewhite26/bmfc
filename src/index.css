@@ -13,6 +13,7 @@
   --white-soft: #eef2ff;
   --muted: #4a5570;
   --font-display: 'Oswald', sans-serif;
+  --font-fancy: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
@@ -39,20 +40,31 @@ html, body, #root {
   inset: 0;
   background-size: cover;
   background-repeat: no-repeat;
-  background-position: 50% 32%;
+  background-position: center center;
   opacity: 0;
-  transform: scale(1.0);
+  z-index: 0;
   transition: opacity 2s ease-in-out;
+  transform: scale3d(1, 1, 1);
+  transform-origin: center center;
+  backface-visibility: hidden;
+  will-change: opacity, transform;
 }
 
 .slide.active {
   opacity: 1;
+  z-index: 1;
   animation: kenBurns 10s ease-in-out forwards;
 }
 
+.slide.exiting {
+  opacity: 0;
+  z-index: 2;
+  transition: opacity 2s ease-in-out;
+}
+
 @keyframes kenBurns {
-  from { transform: scale(1.0); }
-  to   { transform: scale(1.05); }
+  from { transform: scale3d(1, 1, 1); }
+  to   { transform: scale3d(1.06, 1.06, 1); }
 }
 
 /* Cinematic overlays matching bmfc-landing.html exactly */
@@ -387,9 +399,24 @@ html, body, #root {
 }
 
 /* ─── INTRO SCREEN ─── */
+.intro-screen {
+  justify-content: flex-start;
+  padding-top: clamp(3rem, 10vh, 5.5rem);
+}
+
 .intro-text-wrap {
+  width: 100%;
   max-width: 42rem;
   margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.intro-title-slot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-height: clamp(2.6rem, 7vw, 4.2rem);
+  margin-bottom: 2rem;
 }
 
 .intro-title {
@@ -405,6 +432,11 @@ html, body, #root {
   animation: slideUp 1s cubic-bezier(0.2, 0, 0, 1) forwards 0.3s;
 }
 
+.intro-title--settled {
+  opacity: 1;
+  animation: none;
+}
+
 .intro-summary {
   font-family: var(--font-body);
   font-size: clamp(1rem, 2vw, 1.2rem);
@@ -416,11 +448,38 @@ html, body, #root {
   letter-spacing: 0;
 }
 
+.intro-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  align-items: center;
+  text-align: center;
+}
+
+.intro-line {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--white-soft);
+  letter-spacing: 0;
+  max-width: 40rem;
+  margin: 0;
+}
+
 /* ─── SEASON SLIDES ─── */
 .season-slide-wrap {
   max-width: 44rem;
   margin: 0 auto;
   padding: 0 1.5rem;
+  text-align: left;
+}
+
+.season-slide-wrap > .award-category,
+.season-slide-wrap > .award-category--compact,
+.season-slide-wrap .league-slide-title {
+  text-align: center;
+  width: 100%;
 }
 
 .season-stat-grid {
@@ -483,6 +542,7 @@ html, body, #root {
   padding: 0.65rem 0;
   color: var(--white-soft);
   border-bottom: 1px solid rgba(238, 242, 255, 0.08);
+  text-align: left;
 }
 
 .season-table tbody tr:last-child td {
@@ -498,6 +558,46 @@ html, body, #root {
   list-style: none;
   text-align: left;
   margin-top: 0.5rem;
+}
+
+.season-slide-wrap--awards-intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: min(70vh, 32rem);
+  text-align: center;
+}
+
+.awards-intro-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 7vw, 5rem);
+  font-weight: 600;
+  color: var(--gold-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+  margin: 0;
+  animation: awardsIntroCelebrate 3.5s ease-in-out infinite;
+}
+
+@keyframes awardsIntroCelebrate {
+  0%,
+  100% {
+    text-shadow:
+      0 0 28px rgba(201, 168, 76, 0.35),
+      0 0 60px rgba(201, 168, 76, 0.15);
+  }
+  50% {
+    text-shadow:
+      0 0 48px rgba(232, 201, 106, 0.7),
+      0 0 100px rgba(201, 168, 76, 0.4),
+      0 0 140px rgba(201, 168, 76, 0.15);
+  }
+}
+
+.season-section-intro li + li {
+  margin-top: 0.35rem;
 }
 
 .season-highlights li {
@@ -529,15 +629,28 @@ html, body, #root {
   color: rgba(238, 242, 255, 0.65);
   margin-bottom: 1rem;
   letter-spacing: 0.04em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.league-slide-subtitle__comp {
+.league-slide-subtitle__label {
   display: block;
-  margin-top: 0.25rem;
-  font-size: 0.8em;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: rgba(238, 242, 255, 0.4);
+}
+
+.league-slide-subtitle__season {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 600;
+  line-height: 1;
+  color: var(--gold-bright);
+  letter-spacing: 0.08em;
+  margin: 0.15rem 0 0.25rem;
+  text-shadow:
+    0 0 32px rgba(201, 168, 76, 0.5),
+    0 2px 12px rgba(0, 0, 0, 0.4);
 }
 
 .league-bmfc-badge {
@@ -563,6 +676,7 @@ html, body, #root {
 .league-table-body {
   position: relative;
   --league-row-height: 2.15rem;
+  contain: layout style;
 }
 
 .league-row--spacer td {
@@ -578,7 +692,9 @@ html, body, #root {
   right: 0;
   z-index: 2;
   pointer-events: none;
-  filter: drop-shadow(0 6px 24px rgba(201, 168, 76, 0.25));
+  box-shadow: 0 6px 24px rgba(201, 168, 76, 0.2);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .league-table--floating {
@@ -658,26 +774,55 @@ html, body, #root {
   font-weight: 500;
 }
 
-.league-progress-hint {
-  font-family: var(--font-body);
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: rgba(238, 242, 255, 0.35);
-  margin-top: 1rem;
-}
-
-.league-slide--awaiting {
-  cursor: pointer;
-}
-
 /* ─── AWARD SCREEN ─── */
 .award-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   height: 100%;
+  width: 100%;
+}
+
+.award-container--stacked {
+  justify-content: flex-start;
+  padding-top: clamp(3.5rem, 11vh, 6.5rem);
+}
+
+.award-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.award-header .award-category {
+  width: 100%;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.award-season--header {
+  margin-top: 0.65rem;
+  margin-bottom: 0;
+  font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+  letter-spacing: 0.22em;
+  opacity: 0.85;
+}
+
+.award-body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.award-winner-wrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
 }
 
 .award-category {
@@ -701,8 +846,10 @@ html, body, #root {
 }
 
 .award-description-wrap {
+  width: 100%;
   max-width: 42rem;
   padding: 0 1.5rem;
+  margin-top: 0;
 }
 
 .award-description {
@@ -715,12 +862,9 @@ html, body, #root {
 
 .award-season {
   font-family: var(--font-display);
-  font-size: clamp(1rem, 2vw, 1.35rem);
   font-weight: 500;
-  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--white-soft);
-  margin-top: 1rem;
 }
 
 .award-winner {
@@ -733,6 +877,106 @@ html, body, #root {
   color: var(--white-soft);
   text-shadow: 0 0 40px rgba(201, 168, 76, 0.45);
   margin-top: 1rem;
+}
+
+/* ─── MAIN AWARDS INTERLUDE ─── */
+.main-awards-interlude {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.main-awards-interlude__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 1.5rem;
+}
+
+.main-awards-interlude .crest-wrap {
+  margin-bottom: clamp(1.75rem, 4vh, 2.5rem);
+}
+
+.main-awards-interlude__title {
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 6vw, 4.25rem);
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  line-height: 1.1;
+  margin: 0;
+  text-transform: none;
+}
+
+.main-awards-interlude__season {
+  font-family: var(--font-display);
+  font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--white-soft);
+  opacity: 0.85;
+  margin: 1rem 0 0;
+}
+
+/* ─── SERIOUS AWARD CELEBRATION ─── */
+.award-container--celebration {
+  position: relative;
+  overflow: hidden;
+}
+
+.award-container--celebration .award-header,
+.award-container--celebration .award-body {
+  position: relative;
+  z-index: 2;
+}
+
+.award-category--honoured {
+  color: var(--gold-bright);
+  text-shadow:
+    0 0 28px rgba(201, 168, 76, 0.45),
+    0 0 64px rgba(201, 168, 76, 0.15);
+}
+
+.award-celebration {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.award-celebration__wash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 55% at 50% 38%,
+    rgba(201, 168, 76, 0.14) 0%,
+    rgba(201, 168, 76, 0.04) 42%,
+    transparent 72%
+  );
+  animation: awardCelebrationWash 2.4s ease-out forwards;
+}
+
+@keyframes awardCelebrationWash {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.35;
+  }
+}
+
+.award-celebration__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* ─── NAVIGATION CHEVRONS ─── */
@@ -766,3 +1010,84 @@ html, body, #root {
   right: 2rem;
 }
 
+/* ─── MOBILE / TOUCH PERFORMANCE (html.perf-lite) ─── */
+.perf-lite .grain {
+  display: none;
+}
+
+.perf-lite .overlay-colour {
+  mix-blend-mode: normal;
+}
+
+.perf-lite .slide.active {
+  animation: kenBurnsLite 12s ease-in-out forwards;
+}
+
+@keyframes kenBurnsLite {
+  from { transform: scale3d(1, 1, 1); }
+  to { transform: scale3d(1.02, 1.02, 1); }
+}
+
+.perf-lite .crest-img {
+  filter: drop-shadow(0 4px 20px rgba(201, 168, 76, 0.35));
+}
+
+.perf-lite .award-bg__band {
+  background: linear-gradient(
+    90deg,
+    var(--award-bg-1) 0%,
+    var(--award-bg-2) 45%,
+    var(--award-bg-3) 100%
+  );
+  background-size: 220% 100%;
+}
+
+.perf-lite .award-bg--css .award-bg__band {
+  animation: awardBandDrift 14s ease-in-out infinite alternate;
+}
+
+.perf-lite .award-bg--css .award-bg__band:nth-child(2) {
+  animation-delay: -3s;
+}
+
+.perf-lite .award-bg--css .award-bg__band:nth-child(3) {
+  animation-delay: -7s;
+}
+
+.perf-lite .award-bg--css .award-bg__band:nth-child(4) {
+  animation-delay: -11s;
+}
+
+@keyframes awardBandDrift {
+  from { background-position: 0% 50%; }
+  to { background-position: 100% 50%; }
+}
+
+.perf-lite .screen-container {
+  touch-action: manipulation;
+}
+
+.perf-lite .fade-in-out {
+  animation-duration: 0.65s;
+}
+
+.perf-lite .fade-in-out {
+  animation-name: screenFadeInLite;
+}
+
+@keyframes screenFadeInLite {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.perf-lite .league-table-scroll {
+  transform: translateZ(0);
+}
+
+.perf-lite .award-category--honoured {
+  text-shadow: 0 0 24px rgba(201, 168, 76, 0.38);
+}
+
+.perf-lite .award-celebration__wash {
+  animation-duration: 1.8s;
+}

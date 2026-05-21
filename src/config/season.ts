@@ -135,9 +135,10 @@ export const seasonStats = (() => {
 export type SeasonSlide =
   | { type: 'title'; title: string; subtitle?: string }
   | { type: 'stats'; title: string; items: { label: string; value: string }[] }
-  | { type: 'league-journey'; title: string }
+  | { type: 'league-journey'; title: string; phase: 'table' | 'climb' }
   | { type: 'scorers'; title: string; rows: { player: string; goals: number }[] }
-  | { type: 'highlights'; title: string; lines: string[] };
+  | { type: 'highlights'; title: string; lines: string[] }
+  | { type: 'section-intro'; title: string; lines?: string[] };
 
 export const seasonSlides: SeasonSlide[] = [
   {
@@ -161,6 +162,12 @@ export const seasonSlides: SeasonSlide[] = [
   {
     type: 'league-journey',
     title: 'Moving Up The Division',
+    phase: 'table',
+  },
+  {
+    type: 'league-journey',
+    title: 'Moving Up The Division',
+    phase: 'climb',
   },
   {
     type: 'scorers',
@@ -176,6 +183,10 @@ export const seasonSlides: SeasonSlide[] = [
       `${seasonStats.goalsFor} goals scored across ${seasonStats.played} matches`,
       `${seasonStats.wins} victories in all competitions`,
     ],
+  },
+  {
+    type: 'section-intro',
+    title: '2025/26 Awards',
   },
 ];
 

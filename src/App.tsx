@@ -5,24 +5,38 @@ import { Marquee } from './components/Marquee';
 import { AwardScreen } from './components/AwardScreen';
 import { AwardBackground } from './components/AwardBackground';
 import { SeasonScreen } from './components/SeasonScreen';
-import { awards, introConfig, SCREENS_PER_AWARD } from './config/awards';
+import { IntroScreen } from './components/IntroScreen';
+import { TransitionScreen } from './components/TransitionScreen';
+import { MainAwardsInterlude } from './components/MainAwardsInterlude';
+import { isMainAwardsInterlude } from './config/transitions';
+import {
+  awards,
+  introConfig,
+  INTRO_SCREEN_COUNT,
+  resolveAwardSectionScreen,
+  totalAwardScreens,
+} from './config/awards';
 import { SEASON_SLIDE_COUNT, seasonSlides } from './config/season';
 
 export default function App() {
   const [screenIndex, setScreenIndex] = useState(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
-  // Screens: landing (0) → intro (1) → season → 4 per award → thank you
-  const numAwards = awards.length;
-  const seasonStart = 2;
+  // Screens: landing (0) → intro (×N) → season → awards → thank you
+  const introStart = 1;
+  const seasonStart = introStart + INTRO_SCREEN_COUNT;
   const awardStart = seasonStart + SEASON_SLIDE_COUNT;
-  const maxIndex = 1 + SEASON_SLIDE_COUNT + SCREENS_PER_AWARD * numAwards + 1;
+  const awardScreenCount = totalAwardScreens();
+  const maxIndex = awardStart + awardScreenCount;
+  const isIntroScreen =
+    screenIndex >= introStart && screenIndex < seasonStart;
   const isSeasonScreen =
     screenIndex >= seasonStart && screenIndex < awardStart;
   const isAwardScreen =
     screenIndex >= awardStart &&
-    screenIndex < awardStart + SCREENS_PER_AWARD * numAwards;
-  const usesAwardBackground = isSeasonScreen || isAwardScreen;
+    screenIndex < awardStart + awardScreenCount;
+  const usesAwardBackground =
+    isIntroScreen || isSeasonScreen || isAwardScreen;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -68,15 +82,15 @@ export default function App() {
       );
     }
 
-    if (screenIndex === 1) {
-      // 2. Introduction Screen
+    if (isIntroScreen) {
+      const introIndex = screenIndex - introStart;
       return (
-        <div key="intro" className="screen-container fade-in-out">
-          <div className="intro-text-wrap">
-            <h1 className="intro-title">{introConfig.title}</h1>
-            <p className="intro-summary">{introConfig.summary}</p>
-          </div>
-        </div>
+        <IntroScreen
+          key="intro"
+          title={introConfig.title}
+          paragraphs={introConfig.paragraphs}
+          visibleParagraphCount={introIndex + 1}
+        />
       );
     }
 
@@ -90,19 +104,36 @@ export default function App() {
       );
     }
 
-    // Award screens: title → description → title + season → winner
-    const awardOffsetIndex = screenIndex - awardStart;
-    const awardIndex = Math.floor(awardOffsetIndex / SCREENS_PER_AWARD);
-    const awardStep = awardOffsetIndex % SCREENS_PER_AWARD;
+    const awardSection = resolveAwardSectionScreen(screenIndex, awardStart);
 
-    if (awardIndex < numAwards) {
+    if (awardSection?.kind === 'interlude') {
+      const { slide } = awardSection;
+      if (isMainAwardsInterlude(slide)) {
+        return (
+          <MainAwardsInterlude
+            key="interlude-main-awards"
+            title={slide.title}
+            season={slide.season}
+          />
+        );
+      }
+      return (
+        <TransitionScreen
+          key={`interlude-${slide.title}`}
+          title={slide.title}
+          lines={slide.lines}
+        />
+      );
+    }
+
+    if (awardSection?.kind === 'award') {
+      const { awardIndex, awardStep } = awardSection;
       return (
         <AnimatePresence mode="wait">
           <AwardScreen
             key={awardIndex}
             award={awards[awardIndex]}
             awardStep={awardStep}
-            awardIndex={awardIndex}
           />
         </AnimatePresence>
       );

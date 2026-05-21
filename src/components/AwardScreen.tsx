@@ -1,29 +1,188 @@
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import type { ReactNode } from 'react';
+import { motion } from 'framer-motion';
 import type { Award } from '../config/awards';
 import { seasonLabel } from '../config/awards';
-
-/** Cinematic ease — slow in/out for presentation pacing */
-const smoothEase = [0.4, 0, 0.2, 1] as const;
-
-const morph = { duration: 2.2, ease: smoothEase };
-const fade = { duration: 1.4, ease: smoothEase };
-const contentIn = { duration: 1.65, ease: smoothEase, delay: 0.75 };
-const contentOut = { duration: 1.2, ease: smoothEase };
-/** Winner reveal — 4s blur-to-sharp build-up */
-const winnerReveal = {
-  opacity: { duration: 3, ease: smoothEase, delay: 0.7 },
-  scale: { duration: 3.1, ease: smoothEase, delay: 0.65 },
-  filter: { duration: 3.25, ease: smoothEase, delay: 0.75 },
-};
+import { useSettledReveal } from '../hooks/useSettledReveal';
+import {
+  awardBetweenScreen,
+  awardFadeIn,
+  awardWinnerIn,
+  type AwardPace,
+} from '../motion/awardMotion';
 
 interface AwardScreenProps {
   award: Award;
   awardStep: number;
-  awardIndex: number;
 }
 
-export function AwardScreen({ award, awardStep, awardIndex }: AwardScreenProps) {
-  const isCompact = awardStep === 1 || awardStep === 3;
+interface CumulativeBlockProps {
+  stepId: number;
+  visible: boolean;
+  pace: AwardPace;
+  className?: string;
+  shouldAnimate: (id: number, isVisible: boolean) => boolean;
+  markSettled: (id: number) => void;
+  children: ReactNode;
+  /** Joke winner: slight rise-in */
+  liftIn?: boolean;
+}
+
+function CumulativeBlock({
+  stepId,
+  visible,
+  pace,
+  className,
+  shouldAnimate,
+  markSettled,
+  children,
+  liftIn = false,
+}: CumulativeBlockProps) {
+  if (!visible) return null;
+
+  const runEntrance = shouldAnimate(stepId, true);
+  const winnerMotion = liftIn ? awardWinnerIn(pace) : null;
+
+  if (runEntrance) {
+    return (
+      <motion.div
+        className={className}
+        initial={
+          liftIn && winnerMotion
+            ? { opacity: 0, y: winnerMotion.initialY }
+            : { opacity: 0 }
+        }
+        animate={{ opacity: 1, y: 0 }}
+        transition={
+          liftIn && winnerMotion
+            ? { opacity: winnerMotion.opacity, y: winnerMotion.y }
+            : awardFadeIn(pace)
+        }
+        onAnimationComplete={() => markSettled(stepId)}
+      >
+        {children}
+      </motion.div>
+    );
+  }
+
+  return <div className={className}>{children}</div>;
+}
+
+function AwardHeader({
+  title,
+  titleClassName,
+  headerClassName = 'award-header',
+  pace,
+  shouldAnimate,
+  markSettled,
+}: {
+  title: string;
+  titleClassName: string;
+  headerClassName?: string;
+  pace: AwardPace;
+  shouldAnimate: (id: number, isVisible: boolean) => boolean;
+  markSettled: (id: number) => void;
+}) {
+  const runTitle = shouldAnimate(0, true);
+
+  return (
+    <div className={headerClassName}>
+      {runTitle ? (
+        <motion.h2
+          className={titleClassName}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={awardFadeIn(pace, 0)}
+          onAnimationComplete={() => markSettled(0)}
+        >
+          {title}
+        </motion.h2>
+      ) : (
+        <h2 className={titleClassName}>{title}</h2>
+      )}
+      <p className="award-season award-season--header" aria-hidden={false}>
+        {seasonLabel}
+      </p>
+    </div>
+  );
+}
+
+function JokeAwardScreen({
+  award,
+  awardStep,
+}: AwardScreenProps) {
+  const pace: AwardPace = 'joke';
+  const { shouldAnimate, markSettled } = useSettledReveal();
+
+  return (
+    <div className="award-container award-container--stacked">
+      <AwardHeader
+        title={award.category}
+        titleClassName="award-category"
+        pace={pace}
+        shouldAnimate={shouldAnimate}
+        markSettled={markSettled}
+      />
+
+      <div className="award-body">
+        <CumulativeBlock
+          stepId={1}
+          visible={awardStep >= 1}
+          pace={pace}
+          className="award-description-wrap"
+          shouldAnimate={shouldAnimate}
+          markSettled={markSettled}
+        >
+          <p className="award-description">{award.description}</p>
+        </CumulativeBlock>
+
+        <CumulativeBlock
+          stepId={2}
+          visible={awardStep >= 2}
+          pace={pace}
+          className="award-winner-wrap"
+          shouldAnimate={shouldAnimate}
+          markSettled={markSettled}
+          liftIn
+        >
+          <h3 className="award-winner">{award.winner}</h3>
+        </CumulativeBlock>
+      </div>
+    </div>
+  );
+}
+
+function SeriousAwardScreen({ award, awardStep }: AwardScreenProps) {
+  const pace: AwardPace = 'serious';
+  const { shouldAnimate, markSettled } = useSettledReveal();
+
+  return (
+    <div className="award-container award-container--stacked">
+      <AwardHeader
+        title={award.category}
+        titleClassName="award-category"
+        pace={pace}
+        shouldAnimate={shouldAnimate}
+        markSettled={markSettled}
+      />
+
+      <div className="award-body">
+        <CumulativeBlock
+          stepId={1}
+          visible={awardStep >= 1}
+          pace={pace}
+          className="award-description-wrap"
+          shouldAnimate={shouldAnimate}
+          markSettled={markSettled}
+        >
+          <p className="award-description">{award.description}</p>
+        </CumulativeBlock>
+      </div>
+    </div>
+  );
+}
+
+export function AwardScreen({ award, awardStep }: AwardScreenProps) {
+  const pace: AwardPace = award.type;
 
   return (
     <motion.div
@@ -31,76 +190,13 @@ export function AwardScreen({ award, awardStep, awardIndex }: AwardScreenProps) 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={fade}
+      transition={awardBetweenScreen(pace)}
     >
-      <LayoutGroup id={`award-${awardIndex}`}>
-        <div className="award-container">
-          <motion.h2
-            layoutId={`award-title-${awardIndex}`}
-            layout
-            className={
-              isCompact
-                ? 'award-category award-category--compact'
-                : 'award-category'
-            }
-            transition={{ layout: morph }}
-          >
-            {award.category}
-          </motion.h2>
-
-          <AnimatePresence mode="popLayout">
-            {awardStep === 1 && (
-              <motion.div
-                key="description"
-                className="award-description-wrap"
-                initial={{ opacity: 0, y: 24 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -12, transition: contentOut }}
-                transition={contentIn}
-              >
-                <p className="award-description">{award.description}</p>
-              </motion.div>
-            )}
-
-            {awardStep === 2 && (
-              <motion.p
-                key="season"
-                layoutId={`award-season-${awardIndex}`}
-                layout
-                className="award-season"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10, transition: contentOut }}
-                transition={{
-                  layout: morph,
-                  opacity: contentIn,
-                  y: contentIn,
-                }}
-              >
-                {seasonLabel}
-              </motion.p>
-            )}
-
-            {awardStep === 3 && (
-              <motion.h3
-                key="winner"
-                className="award-winner"
-                initial={{ opacity: 0, scale: 0.92, filter: 'blur(16px)' }}
-                animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-                exit={{
-                  opacity: 0,
-                  scale: 0.98,
-                  filter: 'blur(6px)',
-                  transition: { ...contentOut, duration: 1.35 },
-                }}
-                transition={winnerReveal}
-              >
-                {award.winner}
-              </motion.h3>
-            )}
-          </AnimatePresence>
-        </div>
-      </LayoutGroup>
+      {award.type === 'joke' ? (
+        <JokeAwardScreen award={award} awardStep={awardStep} />
+      ) : (
+        <SeriousAwardScreen award={award} awardStep={awardStep} />
+      )}
     </motion.div>
   );
 }

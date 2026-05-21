@@ -14,7 +14,7 @@ function shuffleWithSeed<T>(items: T[], seed: number): T[] {
   return result;
 }
 
-const files = shuffleWithSeed(
+const imageFiles = shuffleWithSeed(
   [
   'IMG-20250617-WA0019.jpg',
   'IMG-20250802-WA0011.jpg',
@@ -70,9 +70,9 @@ const files = shuffleWithSeed(
   'IMG-20260515-WA0003.jpg',
   'IMG-20260516-WA0002.jpg',
   ],
-  20260520,
+  20260521,
 );
 
-export const slideshowImages: string[] = files.map(
+export const slideshowImages: string[] = imageFiles.map(
   (file) => `/images/${encodeURIComponent(file)}`,
 );

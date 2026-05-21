@@ -1,12 +1,16 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { usePerformanceProfile } from '../hooks/usePerformanceProfile';
 
 const BAND_COUNT = 4;
 
 export function AwardBackground() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const perfLite = usePerformanceProfile();
 
   useEffect(() => {
+    if (perfLite) return;
+
     const root = rootRef.current;
     if (!root) return;
 
@@ -42,10 +46,14 @@ export function AwardBackground() {
     return () => {
       tweens.forEach((t) => t.kill());
     };
-  }, []);
+  }, [perfLite]);
 
   return (
-    <div ref={rootRef} className="award-bg" aria-hidden="true">
+    <div
+      ref={rootRef}
+      className={`award-bg${perfLite ? ' award-bg--css' : ''}`}
+      aria-hidden="true"
+    >
       <div className="award-bg__gradients">
         {Array.from({ length: BAND_COUNT }, (_, i) => (
           <div key={i} className="award-bg__band" />
