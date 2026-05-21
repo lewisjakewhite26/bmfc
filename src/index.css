@@ -38,7 +38,8 @@ html, body, #root {
   position: absolute;
   inset: 0;
   background-size: cover;
-  background-position: center;
+  background-repeat: no-repeat;
+  background-position: 50% 32%;
   opacity: 0;
   transform: scale(1.0);
   transition: opacity 2s ease-in-out;
@@ -148,6 +149,22 @@ html, body, #root {
 }
 
 /* Lighter overlays so the award gradient shows through */
+.overlay-gradient--landing {
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(6, 9, 26, 0.75) 0%,
+      rgba(6, 9, 26, 0.25) 38%,
+      rgba(6, 9, 26, 0.2) 55%,
+      rgba(6, 9, 26, 0.82) 100%
+    ),
+    radial-gradient(
+      ellipse 70% 55% at 50% 72%,
+      transparent 0%,
+      rgba(6, 9, 26, 0.45) 100%
+    );
+}
+
 .overlay-gradient--awards {
   background:
     linear-gradient(
@@ -223,6 +240,16 @@ html, body, #root {
   justify-content: center;
   padding: 2rem;
   text-align: center;
+}
+
+/* Crest high on screen — photos show faces lower down, away from the badge */
+.landing-screen {
+  justify-content: flex-start;
+  padding-top: clamp(3rem, 8vh, 6rem);
+}
+
+.landing-screen .crest-wrap {
+  margin-bottom: 1.5rem;
 }
 
 /* ─── TRANSITIONS ─── */
@@ -387,6 +414,261 @@ html, body, #root {
   opacity: 0;
   animation: slideUp 1.2s cubic-bezier(0.2, 0, 0, 1) forwards 0.6s;
   letter-spacing: 0;
+}
+
+/* ─── SEASON SLIDES ─── */
+.season-slide-wrap {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.season-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem 2.5rem;
+  text-align: left;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .season-stat-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.season-stat dt {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(238, 242, 255, 0.5);
+  margin-bottom: 0.25rem;
+}
+
+.season-stat dd {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  color: var(--white-soft);
+  letter-spacing: 0.02em;
+}
+
+.season-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+}
+
+.season-table th {
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--gold);
+  padding: 0 0 0.75rem;
+  border-bottom: 1px solid var(--gold-dim);
+  text-align: left;
+}
+
+.season-table th:last-child,
+.season-table td:last-child {
+  text-align: right;
+}
+
+.season-table td {
+  padding: 0.65rem 0;
+  color: var(--white-soft);
+  border-bottom: 1px solid rgba(238, 242, 255, 0.08);
+}
+
+.season-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.season-table tbody tr:first-child td {
+  font-weight: 500;
+  color: var(--gold-bright);
+}
+
+.season-highlights {
+  list-style: none;
+  text-align: left;
+  margin-top: 0.5rem;
+}
+
+.season-highlights li {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.65;
+  color: var(--white-soft);
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(238, 242, 255, 0.08);
+}
+
+.season-highlights li:last-child {
+  border-bottom: none;
+}
+
+/* ─── LEAGUE TABLE SLIDES ─── */
+.league-slide-wrap {
+  max-width: 56rem;
+  width: 100%;
+}
+
+.league-slide-title {
+  margin-bottom: 0.5rem;
+}
+
+.league-slide-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(0.85rem, 1.6vw, 1rem);
+  color: rgba(238, 242, 255, 0.65);
+  margin-bottom: 1rem;
+  letter-spacing: 0.04em;
+}
+
+.league-slide-subtitle__comp {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8em;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(238, 242, 255, 0.4);
+}
+
+.league-bmfc-badge {
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.2vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-soft);
+  margin-bottom: 1.25rem;
+}
+
+.league-bmfc-badge__pos {
+  color: var(--gold);
+}
+
+.league-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.league-table-body {
+  position: relative;
+  --league-row-height: 2.15rem;
+}
+
+.league-row--spacer td {
+  padding: 0 !important;
+  height: var(--league-row-height);
+  border: none !important;
+  visibility: hidden;
+}
+
+.league-floating-row {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 24px rgba(201, 168, 76, 0.25));
+}
+
+.league-table--floating {
+  width: 100%;
+  margin: 0;
+}
+
+.league-table--floating tbody tr {
+  background: rgba(201, 168, 76, 0.14);
+}
+
+.league-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: clamp(0.65rem, 1.35vw, 0.82rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.league-table thead th {
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  color: var(--gold);
+  padding: 0 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--gold-dim);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.league-table thead th:nth-child(2) {
+  text-align: left;
+  min-width: 9rem;
+}
+
+.league-table tbody td {
+  padding: 0.4rem 0.35rem;
+  text-align: center;
+  color: var(--white-soft);
+  border-bottom: 1px solid rgba(238, 242, 255, 0.06);
+  vertical-align: middle;
+}
+
+.league-table__club {
+  text-align: left !important;
+  white-space: nowrap;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.league-table__pos {
+  color: rgba(238, 242, 255, 0.5);
+  width: 1.5rem;
+}
+
+.league-table__pts {
+  font-weight: 600;
+  color: var(--gold-bright);
+}
+
+.league-table__gd {
+  color: rgba(238, 242, 255, 0.75);
+}
+
+.league-table__deducted {
+  color: rgba(238, 242, 255, 0.35);
+}
+
+.league-row--bmfc td {
+  background: rgba(201, 168, 76, 0.1);
+  color: var(--gold-bright);
+}
+
+.league-row--bmfc .league-table__club {
+  font-weight: 500;
+}
+
+.league-progress-hint {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(238, 242, 255, 0.35);
+  margin-top: 1rem;
+}
+
+.league-slide--awaiting {
+  cursor: pointer;
 }
 
 /* ─── AWARD SCREEN ─── */

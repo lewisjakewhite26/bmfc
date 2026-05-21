@@ -60,13 +60,7 @@ export const awards: Award[] = [
   },
 ];
 
-export const slideshowImages: string[] = [
-  '/images/photo1.jpg',
-  '/images/photo2.jpg',
-  '/images/photo3.jpg',
-  '/images/photo4.jpg',
-  '/images/photo5.jpg',
-];
+export { slideshowImages } from './slideshowImages';
 
 export const introConfig = {
   title: "Welcome to the 2025/26 Awards Night",

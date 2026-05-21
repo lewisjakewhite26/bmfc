@@ -4,17 +4,25 @@ import { Slideshow } from './components/Slideshow';
 import { Marquee } from './components/Marquee';
 import { AwardScreen } from './components/AwardScreen';
 import { AwardBackground } from './components/AwardBackground';
+import { SeasonScreen } from './components/SeasonScreen';
 import { awards, introConfig, SCREENS_PER_AWARD } from './config/awards';
+import { SEASON_SLIDE_COUNT, seasonSlides } from './config/season';
 
 export default function App() {
   const [screenIndex, setScreenIndex] = useState(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
-  // Screens: landing (0) → intro (1) → 4 per award → thank you
+  // Screens: landing (0) → intro (1) → season → 4 per award → thank you
   const numAwards = awards.length;
-  const maxIndex = 1 + SCREENS_PER_AWARD * numAwards + 1;
+  const seasonStart = 2;
+  const awardStart = seasonStart + SEASON_SLIDE_COUNT;
+  const maxIndex = 1 + SEASON_SLIDE_COUNT + SCREENS_PER_AWARD * numAwards + 1;
+  const isSeasonScreen =
+    screenIndex >= seasonStart && screenIndex < awardStart;
   const isAwardScreen =
-    screenIndex >= 2 && screenIndex < 2 + SCREENS_PER_AWARD * numAwards;
+    screenIndex >= awardStart &&
+    screenIndex < awardStart + SCREENS_PER_AWARD * numAwards;
+  const usesAwardBackground = isSeasonScreen || isAwardScreen;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -38,7 +46,7 @@ export default function App() {
     if (screenIndex === 0) {
       // 1. Landing Screen
       return (
-        <div key="landing" className="screen-container fade-in-out">
+        <div key="landing" className="screen-container landing-screen fade-in-out">
           {/* Scrolling Marquee behind the badge */}
           <Marquee />
 
@@ -72,8 +80,18 @@ export default function App() {
       );
     }
 
+    if (isSeasonScreen) {
+      const seasonIndex = screenIndex - seasonStart;
+      return (
+        <SeasonScreen
+          key={`season-${seasonIndex}`}
+          slide={seasonSlides[seasonIndex]}
+        />
+      );
+    }
+
     // Award screens: title → description → title + season → winner
-    const awardOffsetIndex = screenIndex - 2;
+    const awardOffsetIndex = screenIndex - awardStart;
     const awardIndex = Math.floor(awardOffsetIndex / SCREENS_PER_AWARD);
     const awardStep = awardOffsetIndex % SCREENS_PER_AWARD;
 
@@ -121,12 +139,14 @@ export default function App() {
         />
       )}
 
-      {isAwardScreen && <AwardBackground />}
+      {usesAwardBackground && <AwardBackground />}
 
       {/* Cinematic Vignettes and Color Gradients */}
-      <div className={`overlay-gradient${isAwardScreen ? ' overlay-gradient--awards' : ''}`} />
-      <div className={`overlay-sides${isAwardScreen ? ' overlay-sides--awards' : ''}`} />
-      <div className={`overlay-colour${isAwardScreen ? ' overlay-colour--awards' : ''}`} />
+      <div
+        className={`overlay-gradient${screenIndex === 0 ? ' overlay-gradient--landing' : ''}${usesAwardBackground ? ' overlay-gradient--awards' : ''}`}
+      />
+      <div className={`overlay-sides${usesAwardBackground ? ' overlay-sides--awards' : ''}`} />
+      <div className={`overlay-colour${usesAwardBackground ? ' overlay-colour--awards' : ''}`} />
       <div className="grain" />
       {/* Subtle Navigation Chevrons in Top Corners */}
       {screenIndex > 0 && (
