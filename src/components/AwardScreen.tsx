@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import type { Award } from '../config/awards';
 import { seasonLabel } from '../config/awards';
+import { SlowestRaceScreen } from './SlowestRaceScreen';
 import { useSettledReveal } from '../hooks/useSettledReveal';
 import {
   awardBetweenScreen,
@@ -112,9 +113,12 @@ function JokeAwardScreen({
 }: AwardScreenProps) {
   const pace: AwardPace = 'joke';
   const { shouldAnimate, markSettled } = useSettledReveal();
+  const isRaceAward = award.variant === 'slowest-race' && award.race;
 
   return (
-    <div className="award-container award-container--stacked">
+    <div
+      className={`award-container award-container--stacked${isRaceAward && awardStep >= 2 ? ' award-container--race' : ''}`}
+    >
       <AwardHeader
         title={award.category}
         titleClassName="award-category"
@@ -126,7 +130,9 @@ function JokeAwardScreen({
       <div className="award-body">
         <CumulativeBlock
           stepId={1}
-          visible={awardStep >= 1}
+          visible={
+            isRaceAward ? awardStep >= 1 && awardStep !== 2 : awardStep >= 1
+          }
           pace={pace}
           className="award-description-wrap"
           shouldAnimate={shouldAnimate}
@@ -135,17 +141,36 @@ function JokeAwardScreen({
           <p className="award-description">{award.description}</p>
         </CumulativeBlock>
 
-        <CumulativeBlock
-          stepId={2}
-          visible={awardStep >= 2}
-          pace={pace}
-          className="award-winner-wrap"
-          shouldAnimate={shouldAnimate}
-          markSettled={markSettled}
-          liftIn
-        >
-          <h3 className="award-winner">{award.winner}</h3>
-        </CumulativeBlock>
+        {isRaceAward && (
+          <CumulativeBlock
+            stepId={2}
+            visible={awardStep >= 2}
+            pace={pace}
+            className="award-race-wrap"
+            shouldAnimate={shouldAnimate}
+            markSettled={markSettled}
+          >
+            <SlowestRaceScreen
+              config={award.race!}
+              active={awardStep === 2}
+              onRaceComplete={() => markSettled(2)}
+            />
+          </CumulativeBlock>
+        )}
+
+        {!isRaceAward && (
+          <CumulativeBlock
+            stepId={2}
+            visible={awardStep >= 2}
+            pace={pace}
+            className="award-winner-wrap"
+            shouldAnimate={shouldAnimate}
+            markSettled={markSettled}
+            liftIn
+          >
+            <h3 className="award-winner">{award.winner}</h3>
+          </CumulativeBlock>
+        )}
       </div>
     </div>
   );

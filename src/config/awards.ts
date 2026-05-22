@@ -1,4 +1,9 @@
 import type { TransitionSlide } from './transitions';
+import {
+  SLOWEST_RACE_CONFIG,
+  slowestRaceWinner,
+  type SlowestRaceConfig,
+} from './slowestRace';
 
 export function interludeScreenCount(
   interludes: Record<number, TransitionSlide>,
@@ -8,37 +13,64 @@ export function interludeScreenCount(
 
 export type AwardType = 'joke' | 'serious';
 
+/** Joke awards only — `slowest-race` adds a 4th screen with the head race. */
+export type JokeAwardVariant = 'standard' | 'slowest-race';
+
 export interface Award {
   category: string;
   description: string;
   winner: string;
   type: AwardType;
+  variant?: JokeAwardVariant;
+  race?: SlowestRaceConfig;
 }
 
 export const seasonLabel = '2025 · 26';
 
 /** Joke: title (+ season) → description → winner */
 export const SCREENS_PER_JOKE_AWARD = 3;
+/** Joke + race: title → description → race (winner celebration at end of race) */
+export const SCREENS_PER_SLOWEST_RACE_AWARD = 3;
 /** Serious: category (+ season) → award description (no name reveal) */
 export const SCREENS_PER_SERIOUS_AWARD = 2;
 
 export function screensPerAward(award: Award): number {
-  return award.type === 'joke' ? SCREENS_PER_JOKE_AWARD : SCREENS_PER_SERIOUS_AWARD;
+  if (award.type === 'serious') return SCREENS_PER_SERIOUS_AWARD;
+  if (award.variant === 'slowest-race') return SCREENS_PER_SLOWEST_RACE_AWARD;
+  return SCREENS_PER_JOKE_AWARD;
+}
+
+export type AwardSectionScreen =
+  | { kind: 'interlude'; slide: TransitionSlide }
+  | { kind: 'award'; awardIndex: number; awardStep: number };
+
+export function buildAwardTimeline(
+  awardList: Award[],
+  interludes: Record<number, TransitionSlide>,
+): AwardSectionScreen[] {
+  const timeline: AwardSectionScreen[] = [];
+
+  for (let i = 0; i < awardList.length; i++) {
+    const interlude = interludes[i];
+    if (interlude) {
+      timeline.push({ kind: 'interlude', slide: interlude });
+    }
+
+    const steps = screensPerAward(awardList[i]);
+    for (let step = 0; step < steps; step++) {
+      timeline.push({ kind: 'award', awardIndex: i, awardStep: step });
+    }
+  }
+
+  return timeline;
 }
 
 export function totalAwardScreens(
   awardList: Award[],
   interludes: Record<number, TransitionSlide>,
 ): number {
-  return (
-    interludeScreenCount(interludes) +
-    awardList.reduce((sum, award) => sum + screensPerAward(award), 0)
-  );
+  return buildAwardTimeline(awardList, interludes).length;
 }
-
-export type AwardSectionScreen =
-  | { kind: 'interlude'; slide: TransitionSlide }
-  | { kind: 'award'; awardIndex: number; awardStep: number };
 
 export function resolveAwardSectionScreen(
   screenIndex: number,
@@ -46,25 +78,10 @@ export function resolveAwardSectionScreen(
   awardList: Award[],
   interludes: Record<number, TransitionSlide>,
 ): AwardSectionScreen | null {
-  let offset = screenIndex - awardStart;
-
-  for (let i = 0; i < awardList.length; i++) {
-    const interlude = interludes[i];
-    if (interlude) {
-      if (offset === 0) {
-        return { kind: 'interlude', slide: interlude };
-      }
-      offset -= 1;
-    }
-
-    const steps = screensPerAward(awardList[i]);
-    if (offset < steps) {
-      return { kind: 'award', awardIndex: i, awardStep: offset };
-    }
-    offset -= steps;
-  }
-
-  return null;
+  const offset = screenIndex - awardStart;
+  const timeline = buildAwardTimeline(awardList, interludes);
+  if (offset < 0 || offset >= timeline.length) return null;
+  return timeline[offset] ?? null;
 }
 
 export const jokeAwards: Award[] = [
@@ -112,10 +129,18 @@ export const jokeAwards: Award[] = [
   },
   {
     type: 'joke',
-    category: "The Please Don't Retire Award",
+    category: 'Best Dribbler',
     description:
-      'This person has been a tremendous presence in our team over the last few seasons. Unfortunately he has been having thoughts that he may be getting a bit too old for Sunday league football. He is wrong.',
-    winner: 'Simon Darwin',
+      "Not everyone can be the best at everything. However, this lad's dribbling is off the charts.",
+    winner: 'Jack Scanlon',
+  },
+  {
+    type: 'joke',
+    variant: 'slowest-race',
+    category: 'Slowest in the Squad',
+    description: "Sunday league isn't always about pace.",
+    winner: slowestRaceWinner(SLOWEST_RACE_CONFIG).label,
+    race: SLOWEST_RACE_CONFIG,
   },
 ];
 

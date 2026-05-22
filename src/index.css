@@ -1080,6 +1080,519 @@ html, body, #root {
   display: block;
 }
 
+/* ─── SLOWEST RACE (joke award) ─── */
+.award-container--race {
+  max-width: min(96vw, 72rem);
+}
+
+.award-container--race .award-header {
+  margin-bottom: clamp(0.75rem, 2vh, 1.25rem);
+}
+
+.award-race-wrap {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.slowest-race {
+  width: 100%;
+  position: relative;
+}
+
+.slowest-race__board--dimmed {
+  opacity: 0.35;
+  filter: blur(2px);
+  transition: opacity 0.5s ease, filter 0.5s ease;
+  pointer-events: none;
+}
+
+.slowest-race__celebration {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.slowest-race__celebration .award-celebration {
+  z-index: 0;
+}
+
+.slowest-race__winner-card {
+  position: relative;
+  z-index: 2;
+  width: min(92vw, 28rem);
+  text-align: center;
+}
+
+.slowest-race__winner-card-frame {
+  background: linear-gradient(
+    165deg,
+    rgba(13, 20, 40, 0.98) 0%,
+    rgba(6, 9, 26, 0.99) 100%
+  );
+  border: 3px solid var(--gold);
+  border-radius: 16px;
+  padding: clamp(1.75rem, 4vh, 2.5rem) clamp(1.5rem, 4vw, 2.25rem);
+  box-shadow:
+    0 0 0 1px rgba(232, 201, 106, 0.25),
+    0 24px 80px rgba(0, 0, 0, 0.65),
+    0 0 120px rgba(201, 168, 76, 0.35);
+}
+
+.slowest-race__winner-eyebrow {
+  font-family: var(--font-body);
+  font-size: clamp(0.75rem, 1.5vw, 0.9rem);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.25rem;
+}
+
+.slowest-race__winner-head-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.slowest-race__head--large {
+  width: clamp(5.5rem, 14vw, 7.5rem);
+  height: clamp(5.5rem, 14vw, 7.5rem);
+  border-width: 4px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 0 48px rgba(201, 168, 76, 0.45);
+}
+
+.slowest-race__head--large.slowest-race__head--fallback {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.slowest-race__winner-name {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 10vw, 5.5rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--gold-bright);
+  text-shadow:
+    0 0 40px rgba(201, 168, 76, 0.55),
+    0 4px 24px rgba(0, 0, 0, 0.5);
+  margin: 0;
+}
+
+.slowest-race__winner-tag {
+  font-family: var(--font-display);
+  font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--white-soft);
+  opacity: 0.85;
+  margin: 0.85rem 0 0;
+}
+
+.slowest-race__board {
+  background: linear-gradient(
+    180deg,
+    rgba(13, 20, 40, 0.92) 0%,
+    rgba(6, 9, 26, 0.96) 100%
+  );
+  border: 2px solid rgba(201, 168, 76, 0.45);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(201, 168, 76, 0.12);
+}
+
+.slowest-race__ticker {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 1rem;
+  background: rgba(201, 168, 76, 0.12);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.25);
+  font-family: var(--font-body);
+  font-size: clamp(0.75rem, 1.4vw, 0.9rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.slowest-race__ticker-label {
+  color: var(--navy);
+  background: var(--gold);
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 2px;
+}
+
+.slowest-race__ticker-text {
+  color: var(--gold-bright);
+}
+
+.slowest-race__track-wrap {
+  position: relative;
+  padding: 0.75rem 0.5rem 0.75rem 0.25rem;
+}
+
+.slowest-race__finish {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.65rem;
+  bottom: 0.5rem;
+  width: 4px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--gold) 0,
+    var(--gold) 12px,
+    transparent 12px,
+    transparent 24px
+  );
+  z-index: 2;
+  box-shadow: -4px 0 20px rgba(201, 168, 76, 0.35);
+}
+
+.slowest-race__finish-label {
+  position: absolute;
+  top: -0.15rem;
+  right: 0.5rem;
+  transform: translateX(50%) rotate(90deg);
+  transform-origin: right top;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.slowest-race__lanes {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.slowest-race__lane {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: clamp(3.5rem, 8vh, 4.75rem);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  transition: background 0.5s ease, box-shadow 0.5s ease;
+}
+
+.slowest-race__lane:nth-child(odd) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.slowest-race__lane--winner {
+  background: rgba(201, 168, 76, 0.18);
+  box-shadow: inset 0 0 0 2px rgba(201, 168, 76, 0.55);
+}
+
+.slowest-race__lane--leading {
+  background: rgba(201, 168, 76, 0.14);
+  box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.35);
+}
+
+.slowest-race__lane--leading .slowest-race__lane-no {
+  color: var(--gold-bright);
+}
+
+.slowest-race__lane--duel {
+  background: rgba(232, 201, 106, 0.12);
+  animation: duelPulse 0.55s ease-in-out infinite alternate;
+}
+
+@keyframes duelPulse {
+  from {
+    box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.35);
+  }
+  to {
+    box-shadow: inset 0 0 0 2px rgba(232, 201, 106, 0.65);
+  }
+}
+
+.slowest-race__lane-no {
+  font-family: var(--font-display);
+  font-size: clamp(1.1rem, 2.2vw, 1.45rem);
+  font-weight: 600;
+  color: var(--gold);
+  text-align: center;
+  opacity: 0.85;
+}
+
+.slowest-race__lane-track {
+  position: relative;
+  height: 100%;
+  min-height: inherit;
+  overflow: hidden;
+  padding-right: 1.25rem;
+}
+
+.slowest-race__racer {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  will-change: left;
+}
+
+.slowest-race__racer--go {
+  animation-duration: var(--race-duration, 30s);
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* Hunter: flyer out of the blocks, fades — last across */
+.slowest-race__racer--go.slowest-race__racer--hunter {
+  animation-name: raceHunter;
+}
+
+/* Parksy: steady, surges late — finishes just before Hunter */
+.slowest-race__racer--go.slowest-race__racer--parksy {
+  animation-name: raceParksy;
+}
+
+.slowest-race__racer--go.slowest-race__racer--harvey {
+  animation-name: raceHarvey;
+}
+
+.slowest-race__racer--go.slowest-race__racer--sam {
+  animation-name: raceSam;
+}
+
+.slowest-race__racer--go.slowest-race__racer--cooksey {
+  animation-name: raceCooksey;
+}
+
+@keyframes raceHunter {
+  0% {
+    left: 0;
+  }
+  6% {
+    left: 36%;
+  }
+  11% {
+    left: 50%;
+  }
+  18% {
+    left: 56%;
+  }
+  28% {
+    left: 60%;
+  }
+  42% {
+    left: 66%;
+  }
+  55% {
+    left: 71%;
+  }
+  68% {
+    left: 76%;
+  }
+  80% {
+    left: 82%;
+  }
+  90% {
+    left: 88%;
+  }
+  94% {
+    left: 91%;
+  }
+  97% {
+    left: 93%;
+  }
+  100% {
+    left: calc(100% - 4.25rem);
+  }
+}
+
+@keyframes raceParksy {
+  0% {
+    left: 0;
+  }
+  10% {
+    left: 10%;
+  }
+  22% {
+    left: 22%;
+  }
+  38% {
+    left: 38%;
+  }
+  52% {
+    left: 50%;
+  }
+  65% {
+    left: 60%;
+  }
+  76% {
+    left: 70%;
+  }
+  86% {
+    left: 80%;
+  }
+  92% {
+    left: 88%;
+  }
+  95% {
+    left: calc(100% - 4.25rem);
+  }
+  100% {
+    left: calc(100% - 4.25rem);
+  }
+}
+
+@keyframes raceHarvey {
+  0% {
+    left: 0;
+  }
+  20% {
+    left: 28%;
+  }
+  40% {
+    left: 48%;
+  }
+  55% {
+    left: 58%;
+  }
+  65% {
+    left: calc(100% - 4.25rem);
+  }
+  100% {
+    left: calc(100% - 4.25rem);
+  }
+}
+
+@keyframes raceSam {
+  0% {
+    left: 0;
+  }
+  18% {
+    left: 22%;
+  }
+  38% {
+    left: 42%;
+  }
+  55% {
+    left: 55%;
+  }
+  68% {
+    left: 64%;
+  }
+  78% {
+    left: calc(100% - 4.25rem);
+  }
+  100% {
+    left: calc(100% - 4.25rem);
+  }
+}
+
+@keyframes raceCooksey {
+  0% {
+    left: 0;
+  }
+  15% {
+    left: 18%;
+  }
+  32% {
+    left: 35%;
+  }
+  50% {
+    left: 50%;
+  }
+  65% {
+    left: 60%;
+  }
+  76% {
+    left: 68%;
+  }
+  86% {
+    left: calc(100% - 4.25rem);
+  }
+  100% {
+    left: calc(100% - 4.25rem);
+  }
+}
+
+.slowest-race__racer-bob {
+  animation: raceBob 0.35s ease-in-out infinite alternate;
+}
+
+.slowest-race__racer--go .slowest-race__racer-bob {
+  animation-duration: 0.22s;
+}
+
+.slowest-race__racer--go.slowest-race__racer--hunter .slowest-race__racer-bob {
+  animation-duration: 0.14s;
+}
+
+.slowest-race__lane--duel .slowest-race__racer-bob {
+  animation-duration: 0.1s;
+}
+
+@keyframes raceBob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-5px);
+  }
+}
+
+.slowest-race__head {
+  width: clamp(2.75rem, 6vw, 3.75rem);
+  height: clamp(2.75rem, 6vw, 3.75rem);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--gold);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.5),
+    0 0 0 2px rgba(6, 9, 26, 0.8);
+  background: var(--navy-mid);
+}
+
+.slowest-race__head--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gold-bright);
+}
+
+.slowest-race__racer-name {
+  font-family: var(--font-body);
+  font-size: clamp(0.6rem, 1.1vw, 0.72rem);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--white-soft);
+  opacity: 0.9;
+  white-space: nowrap;
+  max-width: 5.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.slowest-race__lane--winner .slowest-race__racer-name {
+  color: var(--gold-bright);
+}
+
 /* ─── NAVIGATION CHEVRONS ─── */
 .nav-arrow {
   position: fixed;

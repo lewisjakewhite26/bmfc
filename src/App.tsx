@@ -27,7 +27,6 @@ export default function App() {
   const [flowMode, setFlowMode] = useState<PresentationFlow | null>(null);
   const [screenIndex, setScreenIndex] = useState(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-
   const composedAwards = useMemo(
     () => (flowMode ? composeAwards(flowMode) : []),
     [flowMode],
@@ -44,6 +43,17 @@ export default function App() {
     ? totalAwardScreens(composedAwards, interludes)
     : 0;
   const maxIndex = awardStart + awardScreenCount;
+
+  const awardSection =
+    flowMode !== null && screenIndex >= awardStart && screenIndex < awardStart + awardScreenCount
+      ? resolveAwardSectionScreen(
+          screenIndex,
+          awardStart,
+          composedAwards,
+          interludes,
+        )
+      : null;
+
   const isIntroScreen =
     flowMode !== null &&
     screenIndex >= introStart &&
@@ -52,12 +62,8 @@ export default function App() {
     flowMode !== null &&
     screenIndex >= seasonStart &&
     screenIndex < awardStart;
-  const isAwardScreen =
-    flowMode !== null &&
-    screenIndex >= awardStart &&
-    screenIndex < awardStart + awardScreenCount;
-  const usesAwardBackground =
-    isIntroScreen || isSeasonScreen || isAwardScreen;
+  const isAwardSlide = awardSection?.kind === 'award' || awardSection?.kind === 'interlude';
+  const usesAwardBackground = isIntroScreen || isSeasonScreen || isAwardSlide;
   const isLandingScreen = flowMode !== null && screenIndex === 0;
 
   const selectFlow = (flow: PresentationFlow) => {
@@ -136,13 +142,6 @@ export default function App() {
       );
     }
 
-    const awardSection = resolveAwardSectionScreen(
-      screenIndex,
-      awardStart,
-      composedAwards,
-      interludes,
-    );
-
     if (awardSection?.kind === 'interlude') {
       const { slide } = awardSection;
       if (isMainAwardsInterlude(slide)) {
@@ -197,6 +196,7 @@ export default function App() {
     );
   };
 
+  const showNavForward = flowMode !== null && screenIndex < maxIndex;
   return (
     <>
       {isLandingScreen && (
@@ -227,7 +227,7 @@ export default function App() {
         </button>
       )}
 
-      {flowMode !== null && screenIndex < maxIndex && (
+      {showNavForward && (
         <button
           className="nav-arrow right"
           onClick={() => setScreenIndex((prev) => prev + 1)}
