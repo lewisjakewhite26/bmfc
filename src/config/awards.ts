@@ -1,8 +1,10 @@
-import {
-  interludeScreenCount,
-  interludesBeforeAward,
-  type TransitionSlide,
-} from './transitions';
+import type { TransitionSlide } from './transitions';
+
+export function interludeScreenCount(
+  interludes: Record<number, TransitionSlide>,
+): number {
+  return Object.keys(interludes).length;
+}
 
 export type AwardType = 'joke' | 'serious';
 
@@ -24,9 +26,12 @@ export function screensPerAward(award: Award): number {
   return award.type === 'joke' ? SCREENS_PER_JOKE_AWARD : SCREENS_PER_SERIOUS_AWARD;
 }
 
-export function totalAwardScreens(awardList: Award[] = awards): number {
+export function totalAwardScreens(
+  awardList: Award[],
+  interludes: Record<number, TransitionSlide>,
+): number {
   return (
-    interludeScreenCount() +
+    interludeScreenCount(interludes) +
     awardList.reduce((sum, award) => sum + screensPerAward(award), 0)
   );
 }
@@ -38,12 +43,13 @@ export type AwardSectionScreen =
 export function resolveAwardSectionScreen(
   screenIndex: number,
   awardStart: number,
-  awardList: Award[] = awards,
+  awardList: Award[],
+  interludes: Record<number, TransitionSlide>,
 ): AwardSectionScreen | null {
   let offset = screenIndex - awardStart;
 
   for (let i = 0; i < awardList.length; i++) {
-    const interlude = interludesBeforeAward[i];
+    const interlude = interludes[i];
     if (interlude) {
       if (offset === 0) {
         return { kind: 'interlude', slide: interlude };
@@ -61,7 +67,7 @@ export function resolveAwardSectionScreen(
   return null;
 }
 
-export const awards: Award[] = [
+export const jokeAwards: Award[] = [
   {
     type: 'joke',
     category: "BMFC's Worst Golfer",
@@ -111,6 +117,9 @@ export const awards: Award[] = [
       'This person has been a tremendous presence in our team over the last few seasons. Unfortunately he has been having thoughts that he may be getting a bit too old for Sunday league football. He is wrong.',
     winner: 'Simon Darwin',
   },
+];
+
+export const seriousAwards: Award[] = [
   {
     type: 'serious',
     category: 'Clubman of the Year',
@@ -147,6 +156,9 @@ export const awards: Award[] = [
     winner: '',
   },
 ];
+
+/** Default order (jokes first); use `composeAwards` for flow-specific order. */
+export const awards: Award[] = [...jokeAwards, ...seriousAwards];
 
 export { slideshowImages } from './slideshowImages';
 
