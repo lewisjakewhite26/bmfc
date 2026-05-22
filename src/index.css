@@ -259,6 +259,16 @@ html, body, #root {
   text-transform: uppercase;
   color: var(--white-soft);
   opacity: 0.7;
+  margin-bottom: 0.65rem;
+}
+
+.mode-picker-screen__fullscreen-hint {
+  font-family: var(--font-body);
+  font-size: clamp(0.75rem, 1.3vw, 0.85rem);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.55;
   margin-bottom: clamp(2rem, 5vh, 3rem);
 }
 
@@ -1591,6 +1601,42 @@ html, body, #root {
 
 .slowest-race__lane--winner .slowest-race__racer-name {
   color: var(--gold-bright);
+}
+
+/* ─── FULLSCREEN ─── */
+.fullscreen-btn {
+  position: fixed;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 100;
+  background: none;
+  border: none;
+  color: var(--white-soft);
+  opacity: 0.12;
+  cursor: pointer;
+  padding: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  border-radius: 50%;
+}
+
+.fullscreen-btn:hover {
+  opacity: 0.5;
+  transform: scale(1.08);
+}
+
+.fullscreen-btn:focus-visible {
+  opacity: 0.55;
+  outline: 2px solid var(--gold-dim);
+  outline-offset: 3px;
+}
+
+:fullscreen #root,
+:-webkit-full-screen #root {
+  width: 100%;
+  height: 100%;
 }
 
 /* ─── NAVIGATION CHEVRONS ─── */

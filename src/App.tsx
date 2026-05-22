@@ -22,11 +22,14 @@ import {
   type PresentationFlow,
 } from './config/presentationFlow';
 import { SEASON_SLIDE_COUNT, seasonSlides } from './config/season';
+import { useFullscreen } from './hooks/useFullscreen';
 
 export default function App() {
   const [flowMode, setFlowMode] = useState<PresentationFlow | null>(null);
   const [screenIndex, setScreenIndex] = useState(0);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const { isFullscreen, enter: enterFullscreen, toggle: toggleFullscreen } =
+    useFullscreen();
   const composedAwards = useMemo(
     () => (flowMode ? composeAwards(flowMode) : []),
     [flowMode],
@@ -69,12 +72,19 @@ export default function App() {
   const selectFlow = (flow: PresentationFlow) => {
     setFlowMode(flow);
     setScreenIndex(0);
+    void enterFullscreen();
   };
 
   useEffect(() => {
-    if (flowMode === null) return undefined;
-
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.code === 'KeyF' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        void toggleFullscreen();
+        return;
+      }
+
+      if (flowMode === null) return;
+
       if (e.code === 'Space' || e.code === 'ArrowRight') {
         e.preventDefault();
         setScreenIndex((prevIndex) =>
@@ -90,7 +100,7 @@ export default function App() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [flowMode, maxIndex]);
+  }, [flowMode, maxIndex, toggleFullscreen]);
 
   const renderActiveScreen = () => {
     if (flowMode === null) {
@@ -238,6 +248,30 @@ export default function App() {
           </svg>
         </button>
       )}
+
+      <button
+        type="button"
+        className="fullscreen-btn"
+        onClick={() => void toggleFullscreen()}
+        aria-label={isFullscreen ? 'Exit fullscreen (F)' : 'Enter fullscreen (F)'}
+        title={isFullscreen ? 'Exit fullscreen (F)' : 'Enter fullscreen (F)'}
+      >
+        {isFullscreen ? (
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M8 3v3a2 2 0 0 1-2 2H3" />
+            <path d="M21 8h-3a2 2 0 0 1-2-2V3" />
+            <path d="M3 16h3a2 2 0 0 1 2 2v3" />
+            <path d="M16 21v-3a2 2 0 0 1 2-2h3" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+            <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+            <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+            <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+          </svg>
+        )}
+      </button>
 
       {renderActiveScreen()}
     </>

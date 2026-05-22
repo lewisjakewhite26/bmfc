@@ -9,6 +9,7 @@ export function ModePickerScreen({ onSelect }: ModePickerScreenProps) {
     <div className="screen-container mode-picker-screen">
       <div className="mode-picker-screen__inner">
         <p className="mode-picker-screen__label">Choose presentation order</p>
+        <p className="mode-picker-screen__fullscreen-hint">Press F for fullscreen</p>
         <div className="mode-picker-cards">
           <button
             type="button"
