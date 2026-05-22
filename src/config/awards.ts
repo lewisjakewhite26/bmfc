@@ -136,6 +136,20 @@ export const jokeAwards: Award[] = [
   },
   {
     type: 'joke',
+    category: 'All Tourque No Break Horsepower',
+    description:
+      'Football is a passionate sport, which sometimes spills over into aggression. Aggression is key, but only when you are actually on the pitch. This award goes to someone who dropped a grenade in the battlezone then hid behind the real footsoldiers.',
+    winner: 'Conner Noades',
+  },
+  {
+    type: 'joke',
+    category: 'Fairplay Award',
+    description:
+      'The game is built on the values of respect — no matter what the situation, respect must run through every part of a player\'s game. The quote "you are the shittest fucking referee I have ever seen" came out of the mouth of a player — in a game we were in the ascendancy, ready to take a vital point which ultimately would have won us the league. Impossible with 10 men.',
+    winner: 'Jack Hinch',
+  },
+  {
+    type: 'joke',
     variant: 'slowest-race',
     category: 'Slowest in the Squad',
     description: "Sunday league isn't always about pace.",
